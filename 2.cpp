@@ -31,7 +31,6 @@ double dFunc2x2(double x1, double x2) {
 void Iteration_Newton(double x1, double x2);
 void solutionM(double x1, double x2, double M);
 double* methodGauss(double mA[n][n], double*);
-double norma(double vF);
 
 
 int main() {
@@ -53,32 +52,30 @@ void Iteration_Newton(double x1, double x2) {
 	cout << "k" << setw(12) << "l1" << setw(14) << "l2" << setw(16) << "x1" << setw(14) << "x2" << endl;
 	cout << "------------------------------------------------------------------" << endl;
 
-	const int NIT = 5;
+	const int NIT = 15;
 	double* dXk = new double[n];
 	double dXk1 = 0, dXk2 = 0;
 	double l1 = 1, l2 = 1, l1_2 = 0, l2_2 = 0;
-	cout << k << "\t " << l1 << " \t" << l2 << " \t" << x1 << " \t" << x2 << endl;
+	cout << k << setw(10) << l1 << setw(10) << l2 << setw(10) << x1 << setw(10) << x2 << endl;
 	try{
-		while (l1 > e1 && l2 > e2) {
-			double Fx[] = { -func1(1,-1), -func2(-1,1) };
+		while (l1 > e1 || l2 > e2) {
+			double Fx[] = { -func1(x1,x2), -func2(x1,x2) };
 			double Jacobian[n][n] = {
-				{dFunc1x1(1,-1), dFunc1x2(1,-1)},
-				{dFunc2x1(1,-1), dFunc2x2(1,-1)}
+				{dFunc1x1(x1,x2), dFunc1x2(x1,x2)},
+				{dFunc2x1(x1,x2), dFunc2x2(x1,x2)}
 			};
 			dXk = methodGauss(Jacobian, Fx);
 			dXk1 = dXk[0] + x1;
 			dXk2 = dXk[1] + x2;
-			l1 = norma(func1(x1, x2));
-			l1_2 = norma(func2(x1, x2));
-			if (l1_2 > l1) {
-				l1 = l1_2;
-			}
+			l1 = abs(func1(x1, x2));
+			l1_2 = abs(func2(x1, x2));
+			l1_2 > l1 ? l1 = l1_2 : l1_2;
 			dXk1 >= 1 ?
-				l2 = norma(dXk1 - x1) / dXk1 :
-				l2 = norma(dXk1 - x1);
+				l2 = abs(dXk1 - x1) / dXk1 :
+				l2 = abs(dXk1 - x1);
 			dXk2 >= 1 ?
-				l2_2 = norma(dXk1 - x2) / dXk1 :
-				l2_2 = norma(dXk1 - x2);
+				l2_2 = abs(dXk2 - x2) / dXk2 :
+				l2_2 = abs(dXk2 - x2);
 			if (l2_2 > l2)
 				l2 = l2_2;
 			x1 = dXk1; x2 = dXk2;
@@ -90,6 +87,10 @@ void Iteration_Newton(double x1, double x2) {
 
 				throw 1;
 				
+			}
+			if (l1 <= e1 && l2 <= e2) {
+				cout << "solution!!!" << endl;
+				break;
 			}
 		}
 	}
@@ -151,25 +152,22 @@ double* methodGauss(double mA[n][n], double cB[n]) {
 	return X;
 }
 
-double norma(double vF) {
-	double normF = abs(vF);
-	normF = max(vF, normF);
 
-	return normF;
-}
 
 void solutionM(double x1, double x2, double M) {
 	int k = 1;
 	cout << "k" << setw(12) << "l1" << setw(14) << "l2" << setw(16) << "x1" << setw(14) << "x2" << setw(14) << "M" << endl;
 	cout << "------------------------------------------------------------------" << endl;
 
-	const int NIT = 10;
+	const int NIT = 15;
 	double* dXk = new double[n];
 	double dXk1 = 0, dXk2 = 0;
 	double l1 = 1, l2 = 1, l1_2 = 0, l2_2 = 0;
+	cout << k << setw(10) << l1 << setw(10) << l2 << setw(10) << x1 << setw(10) << x2 << endl;
+
 	try {
-		while (l1 > e1 && l2 > e2) {
-			double Fx[] = { -func1(1,-1), -func2(-1,1) };
+		while (l1 > e1 || l2 > e2) {
+			double Fx[] = { -func1(x1,x2), -func2(x1,x2) };
 			double Jacobian[n][n] = {
 				{(func1(x1 + M * x1, x2) - func1(x1, x2)) / (M * x1), (func1(x1, x2 + M * x2) - func1(x1, x2)) / (M * x2)},
 				{(func2(x1 + M * x1, x2) - func2(x1, x2)) / (M * x1), (func2(x1, x2 + M * x2) - func2(x1, x2)) / (M * x2)}
@@ -177,17 +175,17 @@ void solutionM(double x1, double x2, double M) {
 			dXk = methodGauss(Jacobian, Fx);
 			dXk1 = dXk[0] + x1;
 			dXk2 = dXk[1] + x2;
-			l1 = norma(func1(x1, x2));
-			l1_2 = norma(func2(x1, x2));
+			l1 = abs(func1(x1, x2));
+			l1_2 = abs(func2(x1, x2));
 			if (l1_2 > l1) {
 				l1 = l1_2;
 			}
 			dXk1 >= 1 ?
-				l2 = norma(dXk1 - x1) / dXk1 :
-				l2 = norma(dXk1 - x1);
+				l2 = abs(dXk1 - x1) / dXk1 :
+				l2 = abs(dXk1 - x1);
 			dXk2 >= 1 ?
-				l2_2 = norma(dXk1 - x2) / dXk1 :
-				l2_2 = norma(dXk1 - x2);
+				l2_2 = abs(dXk2 - x2) / dXk2 :
+				l2_2 = abs(dXk2 - x2);
 			if (l2_2 > l2)
 				l2 = l2_2;
 			x1 = dXk1; x2 = dXk2;
@@ -197,6 +195,10 @@ void solutionM(double x1, double x2, double M) {
 			if (k >= NIT)
 			{
 				throw 1;
+			}
+			if (l1 <= e1 && l2 <= e2) {
+				cout << "solution!!!" << endl;
+				break;
 			}
 		}
 	}
